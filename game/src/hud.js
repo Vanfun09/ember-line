@@ -48,9 +48,14 @@ export function drawHud(ctx, state, t) {
     text(ctx, `COMBO ${state.combo}`, moneyX + 126, 55, { size: 12.5, weight: 800, color: '#24100a', align: 'center', letter: 0.5 });
   }
 
-  // open tickets count / lost
-  text(ctx, `SERVED ${state.served}`, W - 40, 46, { size: 14, weight: 800, color: 'rgba(255,243,220,0.72)', align: 'right', letter: 1.2 });
-  text(ctx, `WALKED OUT ${state.lost}`, W - 40, 66, { size: 12, weight: 700, color: state.lost ? 'rgba(255,107,94,0.8)' : 'rgba(255,243,220,0.35)', align: 'right', letter: 1 });
+  // open tickets count / lost — a walkout is the worst thing that can happen, so it gets weight
+  text(ctx, `SERVED ${state.served}`, W - 190, 40, { size: 13, weight: 800, color: 'rgba(255,243,220,0.6)', align: 'right', letter: 1.2 });
+  if (state.lost > 0) {
+    PILL(ctx, W - 178, 24, 142, 30, 'rgba(120,26,20,0.9)', 0.95);
+    text(ctx, `WALKED OUT ${state.lost}`, W - 107, 44, { size: 13.5, weight: 800, color: '#ffd9d2', align: 'center', letter: 1.1 });
+  } else {
+    text(ctx, 'NO WALKOUTS', W - 40, 44, { size: 12.5, weight: 800, color: 'rgba(143,224,122,0.7)', align: 'right', letter: 1.4 });
+  }
 
   // ---------- ticket rail ----------
   const railY = 104;
@@ -61,16 +66,16 @@ export function drawHud(ctx, state, t) {
   ctx.lineTo(860, railY + 6);
   ctx.stroke();
 
-  const tw = 186;
+  const tw = 200;
   const tgap = 14;
   const ttotal = state.tickets.length * tw + Math.max(0, state.tickets.length - 1) * tgap;
   if (state.tickets.length) {
     ctx.fillStyle = 'rgba(10,8,7,0.9)';
-    rrect(ctx, W / 2 - ttotal / 2 - 18, railY - 12, ttotal + 36, 168, 14);
+    rrect(ctx, W / 2 - ttotal / 2 - 18, railY - 12, ttotal + 36, 188, 14);
     ctx.fill();
     ctx.strokeStyle = 'rgba(255,243,220,0.1)';
     ctx.lineWidth = 1.5;
-    rrect(ctx, W / 2 - ttotal / 2 - 18, railY - 12, ttotal + 36, 168, 14);
+    rrect(ctx, W / 2 - ttotal / 2 - 18, railY - 12, ttotal + 36, 188, 14);
     ctx.stroke();
     ctx.fillStyle = 'rgba(255,179,71,0.55)';
     rrect(ctx, W / 2 - ttotal / 2 - 18, railY - 12, ttotal + 36, 3, 2);
@@ -78,7 +83,7 @@ export function drawHud(ctx, state, t) {
   }
   state.tickets.forEach((o, i) => {
     const x = W / 2 - ttotal / 2 + i * (tw + tgap);
-    drawTicket(ctx, o, x, railY + 10, tw, 128, t, { hot: o.hot });
+    drawTicket(ctx, o, x, railY + 12, tw, 150, t, { hot: o.hot });
   });
   ctx.restore();
 
@@ -111,22 +116,26 @@ function drawStationLabels(ctx, state) {
   for (const [name, x, hint] of labels) {
     const hot = state.hover && Math.abs(x - state.chef.x) < 96 && isHot(state.hover, name);
     ctx.save();
-    ctx.font = '800 12px Segoe UI, system-ui, sans-serif';
-    const nw = ctx.measureText(name).width + 26;
-    ctx.font = '600 11px Segoe UI, system-ui, sans-serif';
-    const hw = ctx.measureText(hint).width + 22;
-    const bw = Math.max(nw, hw, 96);
-    const by = LINE.counterTop - (name === 'SERVE' ? 198 : 142);
-    ctx.globalAlpha = hot ? 1 : 0.94;
-    ctx.fillStyle = 'rgba(12,9,8,0.9)';
-    rrect(ctx, x - bw / 2, by, bw, 38, 9);
+    ctx.font = '800 13px Segoe UI, system-ui, sans-serif';
+    const nw = ctx.measureText(name).width + 30;
+    ctx.font = '700 12px Segoe UI, system-ui, sans-serif';
+    const hw = ctx.measureText(hint).width + 24;
+    const bw = Math.max(nw, hw, 100);
+    const by = LINE.counterTop - (name === 'SERVE' ? 218 : name === 'PASS' ? 168 : 146);
+    ctx.globalAlpha = hot ? 1 : 0.96;
+    ctx.fillStyle = 'rgba(12,9,8,0.92)';
+    rrect(ctx, x - bw / 2, by, bw, 42, 9);
     ctx.fill();
-    ctx.strokeStyle = hot ? COLORS.amber : 'rgba(255,243,220,0.22)';
+    ctx.strokeStyle = hot ? COLORS.amber : 'rgba(255,243,220,0.24)';
     ctx.lineWidth = 1.5;
-    rrect(ctx, x - bw / 2, by, bw, 38, 9);
+    rrect(ctx, x - bw / 2, by, bw, 42, 9);
     ctx.stroke();
-    text(ctx, name, x, by + 16, { size: 12, weight: 800, align: 'center', color: hot ? COLORS.amber : COLORS.cream, letter: 2.2 });
-    text(ctx, hint, x, by + 30, { size: 11.5, weight: 700, align: 'center', color: hot ? 'rgba(255,243,220,0.9)' : 'rgba(255,243,220,0.66)' });
+    // amber rule under the title ties the five plates to one system
+    ctx.fillStyle = hot ? COLORS.amber : 'rgba(255,179,71,0.4)';
+    rrect(ctx, x - bw / 2 + 8, by + 21, bw - 16, 1.5, 1);
+    ctx.fill();
+    text(ctx, name, x, by + 16, { size: 13, weight: 800, align: 'center', color: hot ? COLORS.amber : COLORS.cream, letter: 2.4 });
+    text(ctx, hint, x, by + 36, { size: 12, weight: 700, align: 'center', color: hot ? 'rgba(255,243,220,0.95)' : 'rgba(255,243,220,0.7)' });
     ctx.restore();
   }
 }
@@ -184,12 +193,12 @@ export function drawTitle(ctx, state, t) {
 
   // wordmark, left anchored so it never fights the hero shot
   text(ctx, 'EMBER LINE', 86, 128, { size: 74, weight: 800, color: COLORS.cream, letter: 6 });
-  text(ctx, 'A LATE-NIGHT BURGER RUSH', 90, 164, { size: 14, weight: 700, color: 'rgba(255,179,71,0.9)', letter: 5.4 });
+  text(ctx, 'A LATE-NIGHT BURGER RUSH', 90, 168, { size: 19, weight: 800, color: COLORS.amber, letter: 3 });
   ctx.fillStyle = 'rgba(255,179,71,0.5)';
   ctx.fillRect(90, 182, 336, 2);
 
   // hero burger, plated, right of frame
-  drawBurger(ctx, ['bun', 'lettuce', 'tomato', 'cheese', 'patty', 'cheese', 'bun'], 948, 470, 2.15, { steam: 1.2, t });
+  drawBurger(ctx, ['bun', 'lettuce', 'tomato', 'cheese', 'patty', 'cheese', 'bun'], 948, 470, 2.15, { steam: 0.5, t });
 
   // controls card
   const px = 86, py = 402, pw = 470, ph = 194;

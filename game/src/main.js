@@ -140,6 +140,8 @@ function render(t) {
       moving: state.chef.moving,
       carry: state.chef.carry,
       busy: state.chef.busy,
+      // the chef stands on the same floor as the counter: ~175 cm against a 90 cm line
+      scale: 1.75,
     }, state.t);
   }
 
@@ -180,8 +182,8 @@ function stage(name) {
   if (name === 'cover') {
     state.tickets = [ticket('stack', 0.74), ticket('classic', 0.42)];
     state.plate = ['bun', 'patty', 'cheese', 'onion'];
-    state.grill = [{ cook: 0.62 }, { cook: 0.24 }, null, { cook: 1.18, burned: false }];
-    state.chef.x = LINE.passX - 40;
+    state.grill = [{ cook: 0.12 }, { cook: 0.42 }, { cook: 0.78 }, { cook: 1.3, burned: true }];
+    state.chef.x = LINE.passX - 150;
     state.chef.facing = 1;
     state.chef.carry = ['bun', 'cheese'];
     state.hover = 'pass';
@@ -189,8 +191,8 @@ function stage(name) {
   } else if (name === 'grill') {
     state.tickets = [ticket('double', 0.58), ticket('garden', 0.3)];
     state.plate = ['bun', 'patty'];
-    state.grill = [{ cook: 0.38 }, { cook: 0.74 }, { cook: 1.02, burned: true }, { cook: 0.55 }];
-    state.chef.x = GRILL.x - 10;
+    state.grill = [{ cook: 0.08 }, { cook: 0.34 }, { cook: 0.72 }, { cook: 1.32, burned: true }];
+    state.chef.x = GRILL.x - 226;
     state.chef.facing = 1;
     state.chef.carry = ['patty'];
     state.hover = 'grill';
@@ -200,8 +202,8 @@ function stage(name) {
   } else if (name === 'rush') {
     state.tickets = [ticket('double', 0.66), ticket('garden', 0.28), ticket('stack', 0.85)];
     state.plate = ['bun', 'patty', 'cheese'];
-    state.grill = [{ cook: 0.7 }, { cook: 0.35 }, { cook: 1.1, burned: true }, { cook: 0.2 }];
-    state.chef.x = LINE.passX + 26;
+    state.grill = [{ cook: 0.14 }, { cook: 0.46 }, { cook: 0.8 }, { cook: 1.28, burned: true }];
+    state.chef.x = LINE.passX - 62;
     state.chef.facing = -1;
     state.chef.carry = ['bun', 'cheese', 'patty'];
     state.hover = 'window';
@@ -212,7 +214,7 @@ function stage(name) {
     state.served = 13;
     state.shiftLeft = 42;
     state.popups = [
-      { x: LINE.windowX - 52, y: LINE.y - 116, text: '+$24', life: 1.1, color: '#8fe07a' },
+      { x: LINE.windowX - 52, y: LINE.y - 186, text: '+$24', life: 1.1, color: '#8fe07a' },
     ];
   } else if (name === 'summary') {
     state.mode = 'summary';

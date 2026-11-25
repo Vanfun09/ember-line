@@ -407,21 +407,22 @@ export function drawTicket(ctx, order, x, y, w, h, t, opts = {}) {
   rrect(ctx, w / 2 - 9, -8, 18, 11, 3);
   ctx.fill();
 
-  text(ctx, order.recipe.name.toUpperCase(), 12, 23, { size: 15, weight: 800, color: '#3d2818', letter: 1.2 });
-  text(ctx, `$${order.recipe.price}`, w - 12, 23, { size: 16, weight: 800, color: '#2f6b3a', align: 'right' });
+  text(ctx, order.recipe.name.toUpperCase(), 12, 24, { size: 16.5, weight: 800, color: '#3d2818', letter: 1 });
+  text(ctx, `$${order.recipe.price}`, w - 12, 24, { size: 17, weight: 800, color: '#2f6b3a', align: 'right' });
   ctx.fillStyle = 'rgba(90,70,50,0.3)';
-  ctx.fillRect(10, 29, w - 20, 1.5);
+  ctx.fillRect(10, 31, w - 20, 1.5);
 
   // the stack itself, written out bottom to top: dots carry the colour, words carry the order
   const pad = 12;
+  const FONT = '800 15px Segoe UI, system-ui, sans-serif';
   let line = [];
   let lineW = 0;
-  let cy = 48;
+  let cy = 54;
   const rows = [];
   for (const name of order.recipe.stack) {
     const label = SHORT[name] || name;
-    ctx.font = '800 12.5px Segoe UI, system-ui, sans-serif';
-    const iw = 9 + ctx.measureText(label).width + 8;
+    ctx.font = FONT;
+    const iw = 15 + ctx.measureText(label).width + 9;
     if (lineW + iw > w - pad * 2 && line.length) {
       rows.push([line, lineW]);
       line = [];
@@ -436,23 +437,26 @@ export function drawTicket(ctx, order, x, y, w, h, t, opts = {}) {
     let cx = pad;
     for (const [name, label] of items) {
       ctx.fillStyle = DOT[name] || '#7a5a3a';
-      rrect(ctx, cx, cy - 8, 7, 7, 2);
+      rrect(ctx, cx, cy - 10, 9, 9, 2.5);
       ctx.fill();
-      text(ctx, label, cx + 10, cy, { size: 12.5, weight: 800, color: '#4a3421', letter: 0.1 });
-      ctx.font = '800 12.5px Segoe UI, system-ui, sans-serif';
-      ctx.fillStyle = '#4a3421';
-      cx += 9 + ctx.measureText(label).width + 8;
+      text(ctx, label, cx + 13, cy, { size: 15, weight: 800, color: '#3f2b19', letter: 0.1 });
+      ctx.font = FONT;
+      cx += 15 + ctx.measureText(label).width + 9;
     }
-    cy += 16;
+    cy += 19;
   }
 
-  // timer bar
+  // countdown in seconds, plus the bar — the two together make patience readable at a glance
   const frac = Math.max(0, Math.min(1, order.left / order.total));
+  const tone = frac < 0.28 ? COLORS.bad : frac < 0.6 ? '#c07a1e' : '#2f6b3a';
+  ctx.font = '800 15px Segoe UI, system-ui, sans-serif';
+  text(ctx, `${Math.max(0, Math.ceil(order.left))}s`, w - 12, h - 15, { size: 15, weight: 800, color: tone, align: 'right' });
+  text(ctx, 'PATIENCE', 12, h - 15, { size: 9.5, weight: 800, color: 'rgba(70,50,32,0.6)', letter: 1.6 });
   ctx.fillStyle = 'rgba(60,40,25,0.18)';
-  rrect(ctx, 8, h - 9, w - 16, 5, 2.5);
+  rrect(ctx, 14, h - 9, w - 28, 6, 3);
   ctx.fill();
-  ctx.fillStyle = frac < 0.28 ? COLORS.bad : frac < 0.6 ? COLORS.amber : COLORS.good;
-  rrect(ctx, 8, h - 9, (w - 16) * frac, 5, 2.5);
+  ctx.fillStyle = frac < 0.28 ? COLORS.bad : frac < 0.6 ? COLORS.amber : '#4f9e57';
+  rrect(ctx, 14, h - 9, Math.max(6, (w - 28) * frac), 6, 3);
   ctx.fill();
 
   if (hot > 0) {
@@ -470,9 +474,18 @@ export function drawTicket(ctx, order, x, y, w, h, t, opts = {}) {
 /* ---------------------------------- the chef ---------------------------------- */
 
 export function drawChef(ctx, chef, t) {
-  const { x, y, facing = 1, walk = 0, carry = [], busy = 0 } = chef;
+  const { x, y, facing = 1, walk = 0, carry = [], busy = 0, scale = 1 } = chef;
   ctx.save();
   ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  // contact shadow so the feet belong to the floor
+  const cs = ctx.createRadialGradient(0, 0, 2, 0, 0, 34);
+  cs.addColorStop(0, 'rgba(0,0,0,0.5)');
+  cs.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = cs;
+  ellipse(ctx, 0, 2, 34, 11);
+  ctx.fill();
 
   // shadow
   ctx.fillStyle = 'rgba(0,0,0,0.42)';
@@ -515,6 +528,25 @@ export function drawChef(ctx, chef, t) {
   ctx.moveTo(-14, -80 + bob); ctx.lineTo(-15, -36 + bob);
   ctx.moveTo(14, -80 + bob); ctx.lineTo(15, -36 + bob);
   ctx.stroke();
+
+  // cel shade down the right of the apron, warm bounce on the left
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(-20, -84 + bob);
+  ctx.lineTo(20, -84 + bob);
+  ctx.lineTo(23, -34 + bob);
+  ctx.quadraticCurveTo(0, -26 + bob, -23, -34 + bob);
+  ctx.closePath();
+  ctx.clip();
+  const sg2 = ctx.createLinearGradient(-24, 0, 24, 0);
+  sg2.addColorStop(0, 'rgba(255,196,120,0.16)');
+  sg2.addColorStop(0.45, 'rgba(0,0,0,0)');
+  sg2.addColorStop(1, 'rgba(40,24,14,0.28)');
+  ctx.fillStyle = sg2;
+  ctx.fillRect(-24, -90 + bob, 48, 68);
+  ctx.fillStyle = 'rgba(90,60,40,0.18)';
+  ctx.fillRect(-2, -84 + bob, 2, 52);
+  ctx.restore();
   // apron pocket + stain
   ctx.fillStyle = 'rgba(160,110,70,0.25)';
   rrect(ctx, -9, -58 + bob, 18, 12, 3);
@@ -535,10 +567,34 @@ export function drawChef(ctx, chef, t) {
   ctx.lineTo(31 + reach * 0.4, -54 + bob - swing * (chef.moving ? 1 : 0));
   ctx.stroke();
 
+  // hands: pale mitts at the end of each arm so the silhouette reads as a person
+  const lhx = -31 + reach * 0.4;
+  const lhy = -54 + bob + swing * (chef.moving ? 1 : 0);
+  const rhx = 31 + reach * 0.4;
+  const rhy = -54 + bob - swing * (chef.moving ? 1 : 0);
+  ctx.fillStyle = '#f0d1ae';
+  ellipse(ctx, lhx, lhy, 6, 6.5);
+  ctx.fill();
+  ellipse(ctx, rhx, rhy, 6, 6.5);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(190,140,100,0.5)';
+  ctx.lineWidth = 1;
+  ellipse(ctx, lhx, lhy, 6, 6.5);
+  ctx.stroke();
+  ellipse(ctx, rhx, rhy, 6, 6.5);
+  ctx.stroke();
+
   // head
   ctx.fillStyle = '#eec9a6';
   ellipse(ctx, 0, -104 + bob, 21, 22);
   ctx.fill();
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(0, -104 + bob, 21, -Math.PI * 0.42, Math.PI * 0.5);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(60,34,20,0.16)';
+  ctx.fill();
+  ctx.restore();
   ctx.fillStyle = 'rgba(0,0,0,0.08)';
   ellipse(ctx, 0, -96 + bob, 18, 10);
   ctx.fill();
@@ -591,5 +647,19 @@ export function drawChef(ctx, chef, t) {
     drawIngredient(ctx, carry[i], xx, yy, 0.34, t, 1);
     ctx.restore();
   }
+
+  // rim light from the hood: one warm edge down the silhouette so the chef sits in the scene
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = 'rgba(255,176,96,0.4)';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.arc(0, -104 + bob, 21, Math.PI * 0.95, Math.PI * 1.6);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-20, -76 + bob);
+  ctx.quadraticCurveTo(-27, -50 + bob, -25, -28 + bob);
+  ctx.stroke();
+  ctx.restore();
   ctx.restore();
 }
