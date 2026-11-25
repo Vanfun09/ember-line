@@ -8,9 +8,9 @@ A late-night burger joint, one cook, one counter, and a queue that never stops.
 
 **Ember Line** is a single-file-agnostic, dependency-free HTML5 canvas line-cook game: you walk the counter from the pantry crate to the grill to the pass window, chop vegetables on the board, grill patties without burning them, stack each burger in exactly the order its ticket prints, and hand it off before the customer walks. Nothing loads from the network. No images, no fonts, no audio files: the whole kitchen is drawn with the Canvas 2D API and the sound is synthesised with WebAudio.
 
-![Ember Line — title](screenshots/1-cover.jpg)
-![Ember Line — mid-shift](screenshots/2-rush.jpg)
-![Ember Line — grill](screenshots/3-grill.jpg)
+![Ember Line — mid-shift on the line](screenshots/1-cover.jpg)
+![Ember Line — the grill, raw to burnt](screenshots/2-grill.jpg)
+![Ember Line — title](screenshots/3-title.jpg)
 ![Ember Line — end of shift](screenshots/4-summary.jpg)
 
 ## Play
