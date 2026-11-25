@@ -127,7 +127,7 @@ function render(t) {
   drawCrates(ctx, state.t, state.hover === 'crate');
   drawBoard(ctx, state.t, state.chop, state.hover === 'board');
   drawGrill(ctx, state.t, state.grill, state.hover === 'grill');
-  drawPass(ctx, state.t, state.plate, state.hover === 'pass');
+  drawPass(ctx, state.t, state.plate, state.hover === 'pass', state.mode !== 'title');
   drawServeWindow(ctx, state.t, state, state.hover === 'window');
   emberField(ctx, state.embers, state.t);
 
@@ -212,8 +212,7 @@ function stage(name) {
     state.served = 13;
     state.shiftLeft = 42;
     state.popups = [
-      { x: LINE.windowX, y: LINE.y - 104, text: '+$24', life: 1.1, color: '#8fe07a' },
-      { x: LINE.windowX, y: LINE.y - 130, text: 'x6 combo', life: 1.1, color: '#ffb347' },
+      { x: LINE.windowX - 52, y: LINE.y - 116, text: '+$24', life: 1.1, color: '#8fe07a' },
     ];
   } else if (name === 'summary') {
     state.mode = 'summary';

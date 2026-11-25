@@ -53,32 +53,60 @@ export function drawRoom(ctx, t, state) {
 }
 
 function drawNeon(ctx, t) {
-  const x = 300;
-  const y = 96;
+  // backlit box sign on the wall, bolted to the brick
+  const x = 132;
+  const y = 62;
+  const w = 176;
+  const h = 62;
   ctx.save();
-  ctx.globalCompositeOperation = 'lighter';
-  const flicker = 0.86 + Math.sin(t * 11) * 0.05 + Math.sin(t * 2.3) * 0.06;
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  rrect(ctx, x + 4, y + 6, w, h, 10);
+  ctx.fill();
+  ctx.fillStyle = '#161013';
+  rrect(ctx, x, y, w, h, 10);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.09)';
+  ctx.lineWidth = 2;
+  rrect(ctx, x, y, w, h, 10);
+  ctx.stroke();
+  // mounting bolts
+  ctx.fillStyle = 'rgba(255,255,255,0.14)';
+  for (const [bx, by] of [[x + 9, y + 9], [x + w - 9, y + 9], [x + 9, y + h - 9], [x + w - 9, y + h - 9]]) {
+    ctx.beginPath();
+    ctx.arc(bx, by, 2.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  const flicker = 0.9 + Math.sin(t * 11) * 0.04 + Math.sin(t * 2.3) * 0.05;
   ctx.globalAlpha = flicker;
+  ctx.globalCompositeOperation = 'lighter';
   ctx.strokeStyle = COLORS.neon;
-  ctx.lineWidth = 3;
   ctx.shadowColor = COLORS.neon;
-  ctx.shadowBlur = 22;
-  // a fork and a flame, drawn as one neon glyph
+  ctx.shadowBlur = 16;
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = 'round';
+
+  // small fork, left of the word
+  const fx = x + 24;
   ctx.beginPath();
-  ctx.moveTo(x - 62, y + 16);
-  ctx.lineTo(x - 62, y - 12);
+  ctx.moveTo(fx, y + 42);
+  ctx.lineTo(fx, y + 22);
   ctx.stroke();
   for (let i = -1; i <= 1; i++) {
     ctx.beginPath();
-    ctx.moveTo(x - 68 + i * 6, y - 18);
-    ctx.lineTo(x - 68 + i * 6, y - 2);
+    ctx.moveTo(fx - 1 + i * 5, y + 18);
+    ctx.lineTo(fx - 1 + i * 5, y + 29);
     ctx.stroke();
   }
+  // small flame, right of the word
+  const gx = x + w - 26;
   ctx.beginPath();
-  ctx.moveTo(x + 10, y + 16);
-  ctx.bezierCurveTo(x - 6, y - 2, x + 16, y - 10, x + 12, y - 26);
-  ctx.bezierCurveTo(x + 30, y - 12, x + 30, y + 4, x + 14, y + 16);
+  ctx.moveTo(gx, y + 42);
+  ctx.bezierCurveTo(gx - 11, y + 30, gx + 5, y + 26, gx + 2, y + 15);
+  ctx.bezierCurveTo(gx + 15, y + 25, gx + 15, y + 37, gx + 4, y + 42);
   ctx.stroke();
+
+  text(ctx, 'OPEN', x + w / 2 + 1, y + 41, { size: 21, weight: 800, color: COLORS.neon, align: 'center', letter: 3 });
   ctx.restore();
 }
 
@@ -126,23 +154,28 @@ function drawShelf(ctx, t) {
     rrect(ctx, 261 + i * 22, y - 30, 18, 6, 3);
     ctx.fill();
   });
-  // hanging utensils
+  // a hanging rail with a few pans, tucked under the shelf and clear of everything above
   ctx.strokeStyle = '#4c4038';
   ctx.lineWidth = 3;
-  for (let i = 0; i < 4; i++) {
-    const x = 400 + i * 40;
+  ctx.beginPath();
+  ctx.moveTo(96, 252);
+  ctx.lineTo(288, 252);
+  ctx.stroke();
+  for (let i = 0; i < 3; i++) {
+    const x = 132 + i * 60;
     ctx.beginPath();
-    ctx.moveTo(x, 176); ctx.lineTo(x, 214);
+    ctx.moveTo(x, 252); ctx.lineTo(x, 272);
     ctx.stroke();
-    ctx.save();
-    ctx.translate(x, 214);
-    ctx.rotate(0.1 * Math.sin(t + i));
-    ctx.fillStyle = '#9aa3a8';
-    rrect(ctx, -2, 0, 4, 26, 2);
+    const pg = ctx.createLinearGradient(x - 24, 280, x + 24, 280);
+    pg.addColorStop(0, shade(COLORS.steelDark, -0.2));
+    pg.addColorStop(0.45, COLORS.steel);
+    pg.addColorStop(1, shade(COLORS.steelDark, -0.25));
+    ctx.fillStyle = pg;
+    rrect(ctx, x - 24, 272, 48, 26, 7);
     ctx.fill();
-    ellipse(ctx, 0, 30, 8, 10);
+    ctx.fillStyle = 'rgba(20,18,17,0.55)';
+    ellipse(ctx, x, 272, 22, 6);
     ctx.fill();
-    ctx.restore();
   }
 }
 
@@ -355,18 +388,36 @@ export function drawBoard(ctx, t, chop, hover) {
       drawIngredient(ctx, chop.item, bx, y - 20 - (i % 2) * 4, 0.2 + p * 0.05, t);
     }
   }
-  // knife
-  const swing = Math.sin(t * 14) * (chop.active ? 0.5 : 0);
+  // knife, resting along the right of the board
+  const swing = Math.sin(t * 14) * (chop.active ? 0.28 : 0);
   ctx.save();
-  ctx.translate(x + 34, y - 30);
-  ctx.rotate(-0.5 + swing);
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  ctx.beginPath();
+  ctx.ellipse(x + 44, y - 4, 30, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.translate(x + 22, y - 12);
+  ctx.rotate(-0.12 + swing);
   ctx.fillStyle = '#e6ecf0';
   ctx.beginPath();
-  ctx.moveTo(0, 0); ctx.lineTo(46, 4); ctx.lineTo(46, 12); ctx.lineTo(0, 10);
+  ctx.moveTo(0, -3); ctx.lineTo(44, 1); ctx.lineTo(44, 9); ctx.lineTo(0, 8);
   ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = '#3a2a1e';
-  rrect(ctx, -22, 0, 24, 9, 3);
+  ctx.strokeStyle = 'rgba(18,26,32,0.55)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, -3); ctx.lineTo(44, 1); ctx.lineTo(44, 9); ctx.lineTo(0, 8);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(60,80,92,0.42)';
+  ctx.beginPath();
+  ctx.moveTo(0, 7); ctx.lineTo(44, 8); ctx.lineTo(44, 9.5); ctx.lineTo(0, 8.6);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#2f2419';
+  rrect(ctx, -24, -3, 26, 11, 3);
+  ctx.fill();
+  ctx.fillStyle = '#c9d3d8';
+  rrect(ctx, -1, -3, 4, 11, 1);
   ctx.fill();
   ctx.restore();
 
@@ -448,7 +499,7 @@ export function drawGrill(ctx, t, slots, hover) {
   stationGlow(ctx, GRILL.x, hover, COLORS.ember);
 }
 
-export function drawPass(ctx, t, plate, hover) {
+export function drawPass(ctx, t, plate, hover, showHint = true) {
   const x = LINE.passX;
   const y = LINE.counterTop;
   // marble pass with a stack of clean plates
@@ -471,7 +522,7 @@ export function drawPass(ctx, t, plate, hover) {
   }
 
   // the plate being built on the pass
-  if (plate.length === 0) {
+  if (plate.length === 0 && showHint) {
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
     ellipse(ctx, x - 8, y - 18, 46, 10);
     ctx.fill();
@@ -549,8 +600,15 @@ function stationGlow(ctx, x, hover, color) {
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   glow(ctx, x, LINE.counterTop - 24, 110, color, 0.22);
+  const g2 = ctx.createRadialGradient(x, LINE.counterTop + 30, 4, x, LINE.counterTop + 30, 80);
+  g2.addColorStop(0, 'rgba(255,179,71,0.20)');
+  g2.addColorStop(1, 'rgba(255,179,71,0)');
+  ctx.fillStyle = g2;
+  ctx.beginPath();
+  ctx.ellipse(x, LINE.counterTop + 30, 78, 18, 0, 0, Math.PI * 2);
+  ctx.fill();
   ctx.strokeStyle = color;
-  ctx.globalAlpha = 0.5;
+  ctx.globalAlpha = 0.55;
   ctx.lineWidth = 2;
   ctx.setLineDash([6, 6]);
   ctx.beginPath();
@@ -560,15 +618,6 @@ function stationGlow(ctx, x, hover, color) {
 }
 
 export function drawForeground(ctx, t) {
-  // spectator stools at the bottom edge, out of focus, to sell the diner
-  for (const x of [220, 640, 1040]) {
-    ctx.fillStyle = 'rgba(12,9,8,0.9)';
-    rrect(ctx, x - 40, H - 40, 80, 46, 10);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(120,50,40,0.55)';
-    rrect(ctx, x - 44, H - 52, 88, 20, 10);
-    ctx.fill();
-  }
   // vignette
   const g = ctx.createRadialGradient(W / 2, H * 0.52, 260, W / 2, H * 0.52, 780);
   g.addColorStop(0, 'rgba(0,0,0,0)');

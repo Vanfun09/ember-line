@@ -61,24 +61,24 @@ export function drawHud(ctx, state, t) {
   ctx.lineTo(860, railY + 6);
   ctx.stroke();
 
-  const tw = 164;
-  const tgap = 12;
+  const tw = 186;
+  const tgap = 14;
   const ttotal = state.tickets.length * tw + Math.max(0, state.tickets.length - 1) * tgap;
   if (state.tickets.length) {
     ctx.fillStyle = 'rgba(10,8,7,0.9)';
-    rrect(ctx, W / 2 - ttotal / 2 - 16, railY - 10, ttotal + 32, 148, 14);
+    rrect(ctx, W / 2 - ttotal / 2 - 18, railY - 12, ttotal + 36, 168, 14);
     ctx.fill();
     ctx.strokeStyle = 'rgba(255,243,220,0.1)';
     ctx.lineWidth = 1.5;
-    rrect(ctx, W / 2 - ttotal / 2 - 16, railY - 10, ttotal + 32, 148, 14);
+    rrect(ctx, W / 2 - ttotal / 2 - 18, railY - 12, ttotal + 36, 168, 14);
     ctx.stroke();
     ctx.fillStyle = 'rgba(255,179,71,0.55)';
-    rrect(ctx, W / 2 - ttotal / 2 - 16, railY - 10, ttotal + 32, 3, 2);
+    rrect(ctx, W / 2 - ttotal / 2 - 18, railY - 12, ttotal + 36, 3, 2);
     ctx.fill();
   }
   state.tickets.forEach((o, i) => {
     const x = W / 2 - ttotal / 2 + i * (tw + tgap);
-    drawTicket(ctx, o, x, railY + 8, tw, 112, t, { hot: o.hot });
+    drawTicket(ctx, o, x, railY + 10, tw, 128, t, { hot: o.hot });
   });
   ctx.restore();
 
@@ -116,17 +116,17 @@ function drawStationLabels(ctx, state) {
     ctx.font = '600 11px Segoe UI, system-ui, sans-serif';
     const hw = ctx.measureText(hint).width + 22;
     const bw = Math.max(nw, hw, 96);
-    const by = LINE.counterTop - 138;
-    ctx.globalAlpha = hot ? 0.98 : 0.72;
-    ctx.fillStyle = 'rgba(12,9,8,0.78)';
-    rrect(ctx, x - bw / 2, by, bw, 34, 9);
+    const by = LINE.counterTop - (name === 'SERVE' ? 160 : 142);
+    ctx.globalAlpha = hot ? 1 : 0.94;
+    ctx.fillStyle = 'rgba(12,9,8,0.9)';
+    rrect(ctx, x - bw / 2, by, bw, 38, 9);
     ctx.fill();
-    ctx.strokeStyle = hot ? COLORS.amber : 'rgba(255,243,220,0.14)';
+    ctx.strokeStyle = hot ? COLORS.amber : 'rgba(255,243,220,0.22)';
     ctx.lineWidth = 1.5;
-    rrect(ctx, x - bw / 2, by, bw, 34, 9);
+    rrect(ctx, x - bw / 2, by, bw, 38, 9);
     ctx.stroke();
-    text(ctx, name, x, by + 15, { size: 12, weight: 800, align: 'center', color: hot ? COLORS.amber : COLORS.cream, letter: 2.2 });
-    text(ctx, hint, x, by + 28, { size: 11, weight: 600, align: 'center', color: hot ? 'rgba(255,243,220,0.85)' : 'rgba(255,243,220,0.45)' });
+    text(ctx, name, x, by + 16, { size: 12, weight: 800, align: 'center', color: hot ? COLORS.amber : COLORS.cream, letter: 2.2 });
+    text(ctx, hint, x, by + 30, { size: 11.5, weight: 700, align: 'center', color: hot ? 'rgba(255,243,220,0.9)' : 'rgba(255,243,220,0.66)' });
     ctx.restore();
   }
 }
@@ -186,11 +186,10 @@ export function drawTitle(ctx, state, t) {
   text(ctx, 'EMBER LINE', 86, 128, { size: 74, weight: 800, color: COLORS.cream, letter: 6 });
   text(ctx, 'A LATE-NIGHT BURGER RUSH', 90, 164, { size: 14, weight: 700, color: 'rgba(255,179,71,0.9)', letter: 5.4 });
   ctx.fillStyle = 'rgba(255,179,71,0.5)';
-  ctx.fillRect(90, 182, 300, 2);
+  ctx.fillRect(90, 182, 336, 2);
 
   // hero burger, plated, right of frame
   drawBurger(ctx, ['bun', 'lettuce', 'tomato', 'cheese', 'patty', 'cheese', 'bun'], 948, 470, 2.15, { steam: 1.2, t });
-  text(ctx, 'BUILT TO ORDER', 948, 286, { size: 11, weight: 800, color: 'rgba(255,243,220,0.45)', align: 'center', letter: 4 });
 
   // controls card
   const px = 86, py = 402, pw = 470, ph = 194;
@@ -227,9 +226,9 @@ export function drawTitle(ctx, state, t) {
   const pulse = 0.6 + Math.sin(t * 3.4) * 0.32;
   ctx.save();
   ctx.globalAlpha = pulse;
-  text(ctx, 'PRESS ENTER TO OPEN THE DOORS', 948, 640, { size: 15, weight: 800, color: COLORS.neon, align: 'center', letter: 2.6 });
+  text(ctx, 'PRESS ENTER TO OPEN THE DOORS', 948, 640, { size: 15, weight: 800, color: COLORS.amber, align: 'center', letter: 2.6 });
   ctx.restore();
-  text(ctx, `${SHIFT.seconds} seconds · ${SHIFT.maxTickets} tickets at a time · tip the jar with speed`, 948, 668, { size: 11.5, weight: 600, color: 'rgba(255,243,220,0.42)', align: 'center', letter: 0.8 });
+  text(ctx, `${SHIFT.seconds} seconds · ${SHIFT.maxTickets} tickets at a time · tip the jar with speed`, 948, 668, { size: 12.5, weight: 700, color: 'rgba(255,243,220,0.74)', align: 'center', letter: 0.8 });
 }
 
 /* ---------------------------------- summary ---------------------------------- */
@@ -273,7 +272,7 @@ export function drawSummary(ctx, state, t) {
 
   const pulse = 0.6 + Math.sin(t * 3.4) * 0.3;
   ctx.globalAlpha = pulse;
-  text(ctx, 'PRESS ENTER FOR ANOTHER SHIFT', W / 2, y + ch - 34, { size: 14, weight: 800, color: COLORS.neon, align: 'center', letter: 3 });
+  text(ctx, 'PRESS ENTER FOR ANOTHER SHIFT', W / 2, y + ch - 34, { size: 14, weight: 800, color: COLORS.amber, align: 'center', letter: 3 });
   ctx.restore();
 }
 

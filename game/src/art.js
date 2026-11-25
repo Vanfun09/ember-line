@@ -272,21 +272,22 @@ export function drawBurger(ctx, stack, x, y, s = 1, opts = {}) {
   ctx.scale(s, s);
 
   // plate shadow + plate
-  ctx.fillStyle = 'rgba(0,0,0,0.35)';
-  ellipse(ctx, 0, 8, 78, 15);
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ellipse(ctx, 0, 10, 88, 15);
   ctx.fill();
   const pg = ctx.createLinearGradient(0, -10, 0, 14);
-  pg.addColorStop(0, '#ffffff');
-  pg.addColorStop(1, '#cfc7b8');
+  pg.addColorStop(0, '#e8e2d4');
+  pg.addColorStop(0.55, '#dcd5c5');
+  pg.addColorStop(1, '#b9b1a1');
   ctx.fillStyle = pg;
-  ellipse(ctx, 0, 0, 76, 15);
+  ellipse(ctx, 0, 0, 88, 19);
   ctx.fill();
-  ctx.strokeStyle = 'rgba(120,110,96,0.5)';
+  ctx.strokeStyle = 'rgba(96,86,72,0.55)';
   ctx.lineWidth = 2;
-  ellipse(ctx, 0, 0, 74, 13.5);
+  ellipse(ctx, 0, 0, 85.5, 17.5);
   ctx.stroke();
 
-  let cursor = -stackHeight(stack) / 2 + 18;
+  let cursor = -stackHeight(stack) / 2 + 10;
   for (let i = 0; i < stack.length; i++) {
     const name = stack[i];
     cursor += (LAYER_H[name] || 10) / 2;
@@ -312,15 +313,26 @@ export function drawBurger(ctx, stack, x, y, s = 1, opts = {}) {
 
 export function drawSteam(ctx, x, y, strength, t, spread = 40) {
   if (strength <= 0) return;
+  const baseW = spread * 0.42;
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
-  for (let i = 0; i < 5; i++) {
-    const p = (t * 0.45 + i * 0.21) % 1;
-    const wobble = Math.sin((t * 1.6 + i) * 1.3) * 9;
-    const rise = p * 58;
-    ctx.globalAlpha = (1 - p) * 0.16 * strength;
-    ctx.fillStyle = '#ffe9c9';
-    ellipse(ctx, x + wobble + (i - 2) * (spread / 5), y - rise, 12 + p * 12, 9 + p * 9);
+  // one continuous tapered plume: dense at the food, thinning as it rises and
+  // leaning toward the hood side so the shape reads as extraction, not smoke puffs
+  for (let i = 0; i < 11; i++) {
+    const q = i / 10;
+    const lean = -q * q * 26;
+    const sway = Math.sin(t * 1.1 + q * 4.2) * (2 + q * 7);
+    const cy = y + 3 - q * 78;
+    const cx = x + lean + sway;
+    const rx = baseW * (1.05 - q * 0.5) + 4;
+    const ry = rx * (0.62 + (i % 3) * 0.07);
+    const a = Math.pow(1 - q, 1.1) * 0.19 * strength;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rx * 1.7);
+    g.addColorStop(0, `rgba(255,238,212,${a})`);
+    g.addColorStop(0.4, `rgba(255,228,192,${a * 0.45})`);
+    g.addColorStop(1, 'rgba(255,222,184,0)');
+    ctx.fillStyle = g;
+    ellipse(ctx, cx, cy, rx * 1.7, ry * 1.7);
     ctx.fill();
   }
   ctx.restore();
@@ -395,21 +407,21 @@ export function drawTicket(ctx, order, x, y, w, h, t, opts = {}) {
   rrect(ctx, w / 2 - 9, -8, 18, 11, 3);
   ctx.fill();
 
-  text(ctx, order.recipe.name.toUpperCase(), 10, 21, { size: 13, weight: 800, color: '#3d2818', letter: 1.1 });
-  text(ctx, `$${order.recipe.price}`, w - 10, 21, { size: 14, weight: 800, color: '#2f6b3a', align: 'right' });
+  text(ctx, order.recipe.name.toUpperCase(), 12, 23, { size: 15, weight: 800, color: '#3d2818', letter: 1.2 });
+  text(ctx, `$${order.recipe.price}`, w - 12, 23, { size: 16, weight: 800, color: '#2f6b3a', align: 'right' });
   ctx.fillStyle = 'rgba(90,70,50,0.3)';
-  ctx.fillRect(8, 27, w - 16, 1.5);
+  ctx.fillRect(10, 29, w - 20, 1.5);
 
   // the stack itself, written out bottom to top: dots carry the colour, words carry the order
-  const pad = 10;
+  const pad = 12;
   let line = [];
   let lineW = 0;
-  let cy = 42;
+  let cy = 48;
   const rows = [];
   for (const name of order.recipe.stack) {
     const label = SHORT[name] || name;
-    ctx.font = '800 11px Segoe UI, system-ui, sans-serif';
-    const iw = 8 + ctx.measureText(label).width + 7;
+    ctx.font = '800 12.5px Segoe UI, system-ui, sans-serif';
+    const iw = 9 + ctx.measureText(label).width + 8;
     if (lineW + iw > w - pad * 2 && line.length) {
       rows.push([line, lineW]);
       line = [];
@@ -424,14 +436,14 @@ export function drawTicket(ctx, order, x, y, w, h, t, opts = {}) {
     let cx = pad;
     for (const [name, label] of items) {
       ctx.fillStyle = DOT[name] || '#7a5a3a';
-      rrect(ctx, cx, cy - 7, 6, 6, 2);
+      rrect(ctx, cx, cy - 8, 7, 7, 2);
       ctx.fill();
-      text(ctx, label, cx + 9, cy, { size: 11, weight: 800, color: '#4a3421', letter: 0.1 });
-      ctx.font = '800 11px Segoe UI, system-ui, sans-serif';
+      text(ctx, label, cx + 10, cy, { size: 12.5, weight: 800, color: '#4a3421', letter: 0.1 });
+      ctx.font = '800 12.5px Segoe UI, system-ui, sans-serif';
       ctx.fillStyle = '#4a3421';
-      cx += 8 + ctx.measureText(label).width + 7;
+      cx += 9 + ctx.measureText(label).width + 8;
     }
-    cy += 13;
+    cy += 16;
   }
 
   // timer bar
