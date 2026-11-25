@@ -116,7 +116,7 @@ function drawStationLabels(ctx, state) {
     ctx.font = '600 11px Segoe UI, system-ui, sans-serif';
     const hw = ctx.measureText(hint).width + 22;
     const bw = Math.max(nw, hw, 96);
-    const by = LINE.counterTop - (name === 'SERVE' ? 160 : 142);
+    const by = LINE.counterTop - (name === 'SERVE' ? 198 : 142);
     ctx.globalAlpha = hot ? 1 : 0.94;
     ctx.fillStyle = 'rgba(12,9,8,0.9)';
     rrect(ctx, x - bw / 2, by, bw, 38, 9);

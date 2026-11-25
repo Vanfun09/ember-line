@@ -590,7 +590,6 @@ export function drawServeWindow(ctx, t, state, hover) {
     ctx.stroke();
     ctx.restore();
   }
-  text(ctx, 'PASS', x, y - 118, { size: 13, weight: 800, color: 'rgba(255,243,220,0.4)', align: 'center', letter: 3 });
   ctx.restore();
   stationGlow(ctx, x, hover, COLORS.amber);
 }
@@ -607,13 +606,6 @@ function stationGlow(ctx, x, hover, color) {
   ctx.beginPath();
   ctx.ellipse(x, LINE.counterTop + 30, 78, 18, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = color;
-  ctx.globalAlpha = 0.55;
-  ctx.lineWidth = 2;
-  ctx.setLineDash([6, 6]);
-  ctx.beginPath();
-  ctx.ellipse(x, LINE.counterTop + 30, 78, 18, 0, 0, Math.PI * 2);
-  ctx.stroke();
   ctx.restore();
 }
 
